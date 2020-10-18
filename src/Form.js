@@ -79,7 +79,9 @@ export default class Form extends Component {
   }
 
   onFileChangeHandler = (e) => {
+
     e.preventDefault();
+    console.log(e.target.files)
     this.setState({
       selectedFile: e.target.files[0],
     });

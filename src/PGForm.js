@@ -24,15 +24,19 @@ export default class PGForm extends Component{
           totalRooms: "",
           singlesharingeno:"",
           doublesharingeno:"",
-          triplesharingeno:"",
+          threesharingno:"",
           singlesharingrent:"",
           doublesharingrent:"",
           triplesharingrent:"",
           deposit:"",
-             
-
+          selectedFile:null,
+           landmarks:[],  
+           propertyimageOne:null,
+           specialfeatures:"",
           ac: "",
+          cooler:"",
           wifi: "",
+          laundry:"",
           washingmachine: "",
           fridge: "",
           tv: "",
@@ -42,7 +46,7 @@ export default class PGForm extends Component{
           powerbackup: "",
           parking: "",
           heater: "",
-          camera: "",
+          cctv: "",
           payment: "",
           table: "",
           chair: "",
@@ -50,17 +54,25 @@ export default class PGForm extends Component{
           mattress: "",
           pillow: "",
           cupboard: "",
-          selectedFile: "",
+        
           messveg: "",
           messnonveg:"",
           transportation: "",
           roomcleaning: "",
         };
+        this.changehandler=this.changehandler.bind(this);
         this.handleAmentiesChange = this.handleAmentiesChange.bind(this);
         this.handleServicesChange = this.handleServicesChange.bind(this);
         this.submithandler = this.submithandler.bind(this);
         
      }
+     changehandler = (e) => {
+      //we can extract event values
+      //saving into state property
+      this.setState({
+        [e.target.name]: e.target.value,
+      });
+     };
      handleAmentiesChange = (e) => {
         const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
         const name = e.target.name;
@@ -78,6 +90,67 @@ export default class PGForm extends Component{
           [name]: value,
         });
      };
+     addlandmark(){
+       this.setState({landmarks:[...this.state.landmarks,""]})
+     }
+
+     handlechangelandmark(e,index)
+     {
+           this.state.landmarks[index]=e.target.value;
+           this.setState({landmarks:this.state.landmarks})
+     }
+     handlechangelandmarkdistance(e,index)
+     {
+           this.state.landmarks[index].distance=e.target.value
+           this.setState({landmarks:this.state.landmarks})
+           console.log("landmark array",this.landmarks);
+     }
+     onFileChangeHandler = (e) => {
+      e.preventDefault();
+      console.log("file uploadded",e.target.files[0])
+      console.log("length--",e.target.files.length);
+    
+      this.setState({
+        selectedFile: e.target.files[0],
+        propertyimageOne:e.target.files[0],
+        propertyImageTwo:e.target.files[1],
+        propertyImageThree:e.target.files[2],
+        propertyImageFour:e.target.files[3]
+      });
+      const formData = new FormData();
+      formData.append("file", this.state.selectedFile);
+      //Append the rest data then send
+      axios({
+        method: "post",
+        url: "http://localhost:3001/postImage",
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      }).then(
+        function (response) {
+          console.log(response);
+        },
+        function (error) {
+          console.log("Error");
+        }
+      );
+    };
+     handleRemove(index)
+     {
+       this.state.landmarks.splice(index,1)
+       console.log(this.state.landmarks,'$$$$');
+       this.setState({landmarks:this.state.landmarks})
+     }
+
+     changedropdown = (event) => {
+      this.setState({ [event.target.name]: event.target.value });
+
+    };
+
+    changelandmarkdesc=(e)=>
+    {
+           
+           this.setState({   })
+    }
      submithandler = (e) => {
         e.preventDefault();
         var companydetails = {
@@ -91,7 +164,7 @@ export default class PGForm extends Component{
     
           property: {
             propertyName: this.state.propertyname,
-            propertyType: this.state.propertytype,
+            propertyType: this.state.propertycategory,
             profileDesc: this.state.profiledesc,
             propertyAddress: this.state.propertyaddressfull,
             city:this.state.city,
@@ -111,13 +184,16 @@ export default class PGForm extends Component{
               oneSharingRent: this.state.singlesharingrent,
               doubleSharingRent: this.state.doublesharingrent,
               tripleSharingRent: this.state.triplesharingrent,
-              deposit:this.state.deposit
+              deposit:this.state.deposit,
+              propertyRestriction:this.state.restriction,
+              specialFeatures:this.state.specialfeatures
+
             },
             PropertyImage: {
               propertyImageOne: this.state.selectedFile,
-              propertyImageTwo: "",
-              propertyImageThree: "",
-              propertyImageFour: "",
+              propertyImageTwo: this.state.propertyImageTwo,
+              propertyImageThree: this.state.propertyImageThree,
+              propertyImageFour: this.state.propertyImageFour,
               propertyImageFive: "",
               propertyImageSix: " ",
               propertyImageSeven: "",
@@ -130,22 +206,14 @@ export default class PGForm extends Component{
             PropertyLandmarks: {
               Hospital: "",
               School: "",
-              itPark: "",
-              superMarket: "",
-              railwayStation: "",
-              busStop: "",
-              eduInstitute: "",
-              college: "",
-              medicalStore: "",
-              airport: "",
-              heartofTheCity: "",
-              autoStand: "",
-              vegetableShop: "",
+               Institute:"",
             },
     
             amenities: {
               ac: this.state.ac,
+              cooler:this.state.cooler,
               wifi: this.state.wifi,
+              laundry:this.state.laundry,
               washingmachine: this.state.washingmachine,
               freeze: this.state.fridge,
               tv: this.state.tv,
@@ -155,7 +223,7 @@ export default class PGForm extends Component{
               Powerbackup: this.state.powerbackup,
               ParkingFacility: this.state.parking,
               RoomHeater: this.state.heater,
-              CCTVCameras: this.state.camera,
+              CCTVCameras: this.state.cctv,
               CardPayments: this.state.payment,
               Table: this.state.table,
               Chair: this.state.sofa,
@@ -196,14 +264,14 @@ export default class PGForm extends Component{
                            <div class="two fields">
                               <div class="field">
                                  <label>Property Name</label>
-                                     <input type="text" name="firstname" placeholder="Property Name"/>
+                                     <input type="text" name="propertyname" placeholder="Property Name" onChange={this.changehandler}/>
                               </div>
                               <div class="field">
                                   <label>Property Type</label>
-                                    <select>
+                                    <select   name="propertytype" onChange={this.changedropdown}>
                                      <option value="">Property Type</option>
-                                     <option value="1">PG</option>
-                                     <option value="0">Hostel</option>
+                                     <option value="pg">PG</option>
+                                     <option value="hostel">Hostel</option>
                                     </select>
                               </div>
                            </div>
@@ -212,15 +280,18 @@ export default class PGForm extends Component{
                            <div class="two fields">
                               <div class="field">
                                 <label>Property Category</label>
-                                   <select>
-                                     <option value="">Property Category</option>
-                                     <option value="1">Girls</option>
-                                     <option value="0">Boys</option>
+                                   <select 
+                                      value={this.state.value}
+                                       name="propertycategory"
+                                       onChange={this.changedropdown}>
+                                     <option value="disabled">Property Category</option>
+                                     <option value="girls">Girls</option>
+                                     <option value="boys">Boys</option>
                                    </select>
                               </div>
                               <div class="field">
                                 <label>Property Address (Short)</label>
-                                    <input type="text" name="propertyaddress" placeholder="Property Address Short"/> 
+                                    <input type="text" name="propertyaddressshort" placeholder="Property Address Short" onChange={this.changehandler}/> 
                               </div>
                            </div>
                     </div>
@@ -228,11 +299,11 @@ export default class PGForm extends Component{
                       <div class="two fields">
                         <div class="field">
                            <label>Property Address(Full)</label>
-                              <input type="text" name="propertyaddressfull" placeholder="Property Address"/>
+                              <input type="text" name="propertyaddressfull" placeholder="Property Address" onChange={this.changehandler}/>
                         </div>
                         <div class="field">
                             <label>Property Street</label>
-                                <input type="text" name="propertystreet" placeholder="Property Street"/>
+                                <input type="text" name="propertystreet" placeholder="Property Street" onChange={this.changehandler}/>
                         </div>
                      </div>
                   </div>
@@ -240,11 +311,11 @@ export default class PGForm extends Component{
                      <div class="two fields">
                         <div class="field">
                           <label>State</label>
-                               <input type="text" name="state" placeholder="State"/>
+                               <input type="text" name="state" placeholder="State" onChange={this.changehandler}/>
                         </div>
                         <div class="field">
                             <label>PinCode</label>
-                               <input type="text" name="pincode" placeholder="Pincode"/>
+                               <input type="text" name="pincode" placeholder="Pincode" onChange={this.changehandler}/>
                         </div>
                     </div>
                  </div>
@@ -252,11 +323,11 @@ export default class PGForm extends Component{
                    <div class="two fields">
                       <div class="field">
                           <label>City</label>
-                               <input type="text" name="city" placeholder="City"/>
+                               <input type="text" name="city" placeholder="City" onChange={this.changehandler}/>
                       </div>
                     <div class="field">
                         <label>Property Rating</label>
-                           <input type="text" name="rating" placeholder="Rating"/>
+                           <input type="text" name="rating" placeholder="Rating" onChange={this.changehandler}/>
                     </div>
                   </div>
                 </div>
@@ -264,11 +335,11 @@ export default class PGForm extends Component{
                    <div class="two fields">
                        <div class="field">
                            <label>Mobile Number one</label>
-                                <input type="text" name="mobileone" placeholder="Mobile No One"/>
+                                <input type="text" name="mobileone" placeholder="Mobile No One" onChange={this.changehandler}/>
                         </div>
                         <div class="field">
                             <label>Mobile No. Two</label>
-                                 <input type="text" name="mobiletwo" placeholder="Mobile No Two"/>
+                                 <input type="text" name="mobiletwo" placeholder="Mobile No Two" onChange={this.changehandler}/>
                         </div>
                   </div>
                 </div>
@@ -276,11 +347,11 @@ export default class PGForm extends Component{
                    <div class="two fields">
                       <div class="field">
                          <label>No. of Rooms in property</label>
-                             <input type="text" name="totalroom" placeholder="Mobile No One"/>
+                             <input type="text" name="totalRooms" placeholder="Total No of ROoms" onChange={this.changehandler}/>
                       </div>
                       <div class="field">
                          <label>No. of Single Sharing Room</label>
-                                <input type="text" name="singlesharingeno" placeholder="Mobile No Two"/>
+                                <input type="text" name="singlesharingeno" placeholder="No of Single Sharing" onChange={this.changehandler}/>
                      </div> 
                    </div>
                 </div> 
@@ -288,11 +359,11 @@ export default class PGForm extends Component{
                     <div class="two fields">
                        <div class="field">
                             <label>No. of Double Sharing Room</label>
-                                   <input type="text" name="doublesharingno" placeholder="No. of Double Sharing Room"/>
+                                   <input type="text" name="doublesharingno" placeholder="No. of Double Sharing Room" onChange={this.changehandler}/>
                        </div>
                        <div class="field">
                            <label>No. of Triple Sharing Room</label>
-                                  <input type="text" name="triplesharingno" placeholder="No. of triple Sharing Room"/>
+                                  <input type="text" name="threesharingno" placeholder="No. of triple Sharing Room" onChange={this.changehandler}/>
                        </div> 
                   </div>
                 </div>
@@ -300,11 +371,11 @@ export default class PGForm extends Component{
                     <div class="two fields">
                        <div class="field">
                             <label>Single Sharing Rent</label>
-                                   <input type="text" name="singlesharingrent" placeholder="Single Sharing Rent"/>
+                                   <input type="text" name="singlesharingrent" placeholder="Single Sharing Rent" onChange={this.changehandler}/>
                        </div>
                        <div class="field">
                            <label>Double Sharing Rent</label>
-                                  <input type="text" name="doublesharingrent" placeholder="Double Sharing Rent"/>
+                                  <input type="text" name="doublesharingrent" placeholder="Double Sharing Rent" onChange={this.changehandler}/>
                        </div> 
                   </div>
                 </div>    
@@ -312,51 +383,115 @@ export default class PGForm extends Component{
                   <div class="two fields">
                      <div class="field">
                         <label>Triple Sharing Rent</label>
-                             <input type="text" name="triplesharingrent" placeholder="Triple Sharing Rent"/>
+                             <input type="text" name="triplesharingrent" placeholder="Triple Sharing Rent" onChange={this.changehandler}/>
                      </div>
                      <div class="field">
                         <label>Deposit</label>
-                            <input type="text" name="deposit" placeholder="Deposit"/>
-                     </div> 
+                            <input type="text" name="deposit" placeholder="Deposit" onChange={this.changehandler}/>
+                     </div>   
                   </div>
                 </div> 
-                <div className="field">
-                  <div className="two fields">
-                     <div className="field">
-                       <label>Landmark Type</label>
-                          <select multiple={true} className="ui dropdown">
-                             <option value="">Select Landmark</option>
-                             <option value="s">School</option>
-                             <option value="AF">Hospital</option>
-                          </select>
+                <div class="field">
+                <div class="two fields">
+                   <div class="field">
+                   <div className="file-field input-field">
+                   <div className="btn">
+                     <span>File</span>
+                     <input
+                       type="file"
+                       name="propertyimage"
+                       accept=".jpg, .jpeg, .png"
+                       onChange={this.onFileChangeHandler}
+                       multiple
+                     />
+                   </div>
+                   </div>   
+                </div>
+              </div> 
+              </div>
+      {/*}          <div className="field">
+                      <div class="two fields">
+                              <div className="field">
+                                <label>Landmark </label>
+                                   <select  
+                                      multiple="" className="ui multiple selection fluid dropdown"
+                                      value={this.state.value}
+                                      name="landmark"
+                                      onChange={this.changedropdown}  
+                                            >
+                                      <option value="">Landmark</option>
+                                     <option value="Institute">Institute</option>
+                                     <option value="Hospital">Hospital</option>
+                                     <option value="Market">Markets</option>
+                                   </select>
+                              </div>
+                              <div className="field">
+                                 <label>{this.state.landmark} distance from PG/Hostel</label>
+                                 <input type="text" name="landmarkdesc" value={this.state.value} onChange={this.changelandmarkdesc}/>
+                              </div>
+                       </div>  
+               </div>
+        */}
+               <div class="field">
+                   <div class="two fields">
+                      <div class="field">
+                      <label>Landmark Name</label>
+                       {this.state.landmarks.map((landmark,index)=>
+                         {
+                           return(
+                             <div key={index}>
+                             <input name="name" onChange={(e)=>this.handlechangelandmark(e,index)}
+                               value={landmark}/>
+                          {/*}    <input  name="distance" placeholder="landmark distance" onChange={(e)=>this.handlechangelandmarkdistance(e,index)}/>
+                           */}  
+                              <button onClick={(e)=>this.handleRemove(e)}>Remove</button>
+                             </div>
+
+                           )
+                            })}
+                    </div>
+                     <div class="field">
+                        
+                         <button onClick={(e)=>this.addlandmark(e)} >Add LandMark</button>
                      </div>
-                    
                   </div>
-               </div>  
+               </div>
                <div class="field">
                       <div class="two fields">
                         <div class="field">
                            <label>Property Owner Name</label>
-                              <input type="text" name="ownername" placeholder="Property owner name"/>
+                              <input type="text" name="ownername" placeholder="Property owner name" onChange={this.changehandler}/>
                         </div>
                         <div class="field">
                             <label>Property/Owner Email</label>
-                                <input type="email" name="email" placeholder="Email"/>
+                                <input type="email" name="email" placeholder="Email" onChange={this.changehandler}/>
                         </div>
                      </div>
-                  </div>
+               </div>
+               <div class="field">
+                <div class="two fields">
+                 <div class="field">
+                    <label>Property Restriction</label>
+                       <input type="text" name="restriction" placeholder="Restriction" onChange={this.changehandler}/>
+                 </div>
+                 <div class="field">
+                     <label>Special Features</label>
+                         <input type="text" name="specialfeatures" placeholder="SpecialFeatures" onChange={this.changehandler}/>
+                 </div>
+               </div>
+              </div>
                <div class="field">
                  <label>Amenties Type</label>
                     <div class="two fields">
                      <div className="field">
                       <div className="ui checkbox">
-                       <input  value="ac"type="checkbox"  onChange={this.handleAmentiesChange} />
+                       <input  name="ac"type="checkbox"  onChange={this.handleAmentiesChange} />
                        <label>AC</label>
-                     </div>
+                     </div> 
                    </div>
                    <div className="field">
                       <div className="ui checkbox">
-                       <input type="checkbox" value="cooler"  onChange={this.handleAmentiesChange}/>
+                       <input type="checkbox" name="cooler"  onChange={this.handleAmentiesChange}/>
                        <label>Cooler</label>
                      </div>
                    </div>
@@ -388,7 +523,7 @@ export default class PGForm extends Component{
                    </div>
                    <div className="field">
                       <div className="ui checkbox">
-                          <input name="selfcooking" type="checkbox"  onChange={this.handleAmentiesChange} />
+                          <input name="kitchen" type="checkbox"  onChange={this.handleAmentiesChange} />
                            <label>SelfCookingKitchen</label>
                      </div>
                    </div>
