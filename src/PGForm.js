@@ -59,6 +59,13 @@ export default class PGForm extends Component{
           messnonveg:"",
           transportation: "",
           roomcleaning: "",
+          formErrors:
+          {
+            propertyname:"",
+            email:"",
+            mobileone:""
+                         
+          }
         };
         this.changehandler=this.changehandler.bind(this);
         this.handleAmentiesChange = this.handleAmentiesChange.bind(this);
@@ -153,6 +160,18 @@ export default class PGForm extends Component{
     }
      submithandler = (e) => {
         e.preventDefault();
+  /* if(formValid(this.state.formErrors))
+        {
+          console.log(`
+            PropertyName: ${this.state.propertyname}
+            Email: ${this.state.email}
+          
+          `)
+        }
+        else{
+          console.log("Form INVALID Error Message")
+        }
+        */
         var companydetails = {
           ownername: this.state.ownername,
           address: this.state.propertyaddressshort,
@@ -248,6 +267,9 @@ export default class PGForm extends Component{
           .then((res) => {
             console.log("posted!", res);
           });
+
+          alert('PG Details are saved: ');
+          e.target.reset();
       };
     componentDidMount()
     {
@@ -315,7 +337,7 @@ export default class PGForm extends Component{
                         </div>
                         <div class="field">
                             <label>PinCode</label>
-                               <input type="text" name="pincode" placeholder="Pincode" onChange={this.changehandler}/>
+                               <input type="text" name="pincode" placeholder="Pincode" pattern="^[1-9][0-9]{5}$"  title="Enter valid Pincode with 6 digit" maxlength="6" onChange={this.changehandler}/>
                         </div>
                     </div>
                  </div>
@@ -335,11 +357,11 @@ export default class PGForm extends Component{
                    <div class="two fields">
                        <div class="field">
                            <label>Mobile Number one</label>
-                                <input type="text" name="mobileone" placeholder="Mobile No One" onChange={this.changehandler}/>
+                                <input type="text" name="mobileone"  pattern="[1-9]{1}[0-9]{9}" title="Enter Valid Mobile No." placeholder="Mobile No One" onChange={this.changehandler}/>
                         </div>
                         <div class="field">
                             <label>Mobile No. Two</label>
-                                 <input type="text" name="mobiletwo" placeholder="Mobile No Two" onChange={this.changehandler}/>
+                                 <input type="text" name="mobiletwo"  pattern="[1-9]{1}[0-9]{9}" title="Enter Valid Mobile No." placeholder="Mobile No Two" onChange={this.changehandler}/>
                         </div>
                   </div>
                 </div>
